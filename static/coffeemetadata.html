@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+</head>
+<body>
+	<title>HTCPCP</title>
+	<img border="0" src="/images/coffeemetadataimg.jpg" alt="coffeeMetadata" width="250" height="550"> <br>
+	<button id="backButton">BACK</button> <br>
+
+	<script> 
+		$("#backButton").click(function(){
+			$.ajax({url:"http://localhost:5000/",
+					type: "GET",
+					async: true,
+					dataType:"html", 
+					success:function(response){
+						document.open();
+						document.write(response);
+						document.close();   
+					 },
+					 error: function(){
+						alert('REDIRECT FAILED.');
+					 }
+			});
+		});
+	</script>
+
+</body>
+</html>

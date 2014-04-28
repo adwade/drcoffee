@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+</head>
+<body>
+
+	<title>HTCPCP</title>
+	<div>
+		<img src="/images/mrcoffee.jpg" alt="mrcoffee" align="left" width="500" height="500">
+	</div>
+	<h1>HTCPCP</h1>
+	<h3>ALL YOUR COFFEE ARE BELONG TO US</h3>
+	<p>BREWING DEVICE</p>
+	<input id="coffeepotButton" type="radio" name="deviceButton" value="coffeepotButton">Coffee Pot<br>
+	<input id="teapotButton" type="radio" name="deviceButton" value="teapotButton">Tea Pot<br>
+	<p>BREW OPTIONS</p>
+	<input id="startBrewButton" type="radio" name="brewButton" value="startBrew">Start Brewing<br>
+	<input id="stopBrewButton" type="radio" name="brewButton" value="stopBrew">Stop Brewing<br>
+	<p>ADDITION OPTIONS</p>
+	<input id="wholeMilkButton" type="radio" name="additionButton" value="wholeMilk">Whole Milk<br>
+	<input id="noAdditionButton" type="radio" name="additionButton" value="none">None<br> <br>
+	<button id="brewButton">EXECUTE</button> <br>
+	<button id="sayWhenButton">SAY WHEN</button> <br>
+	<button id="coffeePropButton">GET PROPERTIES</button> <br>
+	<p>BY ROSS LAZER AND ADAM WADE</p>
+
+	<script>
+
+		
+		disableBrewing();
+		disableAdditions();
+
+		$("#coffeepotButton").click(function(){
+			enableBrewing();
+			enableAdditions();
+		});
+
+
+		$("#teapotButton").click(function(){
+			enableStartDisableStopBrewing();
+		});
+
+
+		$("#stopBrewButton").click(function(){
+			disableAdditions();
+		});
+
+		$("#startBrewButton").click(function(){
+			enableAdditions();          
+		});
+
+
+		$("#brewButton").click(function(){
+
+			if(isValidBrew()){
+
+				brewingDevice = getBrewingDevice();
+				coffeeAdditions = getCoffeeAdditions();
+				coffeeCommand = getCoffeeCommand();
+
+				$.ajax({url:"/brewCoffee?__METHOD_OVERRIDE__=BREW",
+						type: "POST",
+						async: true,
+						dataType:"html", 
+						headers: { 'Brewing-Device':brewingDevice,
+								   'Coffee-Command':coffeeCommand, 
+								   'Accept-Additions':coffeeAdditions },
+						contentType: 'message/coffeepot',
+						success:function(response){
+							alert(response)
+						},
+						error: function(response){
+							alert('EXECUTE FAILED.')
+						}
+				});
+
+			}
+		
+		});
+
+		$("#sayWhenButton").click(function(){
+			$.ajax({url:"/sayWhen?__METHOD_OVERRIDE__=WHEN",
+					type: "POST",
+					async: true,
+					dataType:"html", 
+					success:function(response){
+						alert(response);
+					 },
+					 error: function(){
+						alert('SAY WHEN REQUEST FAILED.');
+					 }
+			});
+		});
+
+
+		$("#coffeePropButton").click(function(){
+		
+			$.ajax({url:"/getCoffeeProperties?__METHOD_OVERRIDE__=PROPFIND",
+					type: "POST",
+					async: true,
+					dataType:"html", 
+					success:function(response){
+						document.open();
+						document.write(response);
+						document.close();   
+					 },
+					 error: function(){
+						alert('COFFEE PROPERTIES REQUEST FAILED.');
+					 }
+			});
+		
+		});
+
+
+		function isValidBrew(){
+
+			if(!$('#coffeepotButton').is(':checked') &&
+			   !$('#teapotButton').is(':checked')){
+
+				alert('Please select a device to execute commands on.');
+
+			}
+			else if(!$('#startBrewButton').is(':checked') &&
+					!$('#stopBrewButton').is(':checked')){
+
+				alert('Please select an option for brewing.');
+
+			}
+			else if(!$('#wholeMilkButton').is(':checked') &&
+					!$('#noAdditionButton').is(':checked') &&
+					!$('#stopBrewButton').is(':checked')){
+
+				alert('Please select an option for additions.');
+
+			}
+			else{
+
+				return true;
+
+			}
+
+		}
+
+		function enableAdditions(){
+
+			$('#wholeMilkButton').prop('disabled', false);
+			$('#noAdditionButton').prop('disabled', false);
+
+		}
+
+		function disableAdditions(){
+
+			$('#wholeMilkButton').prop('checked', false);
+			$('#noAdditionButton').prop('checked', false);
+			$('#wholeMilkButton').prop('disabled', true);
+			$('#noAdditionButton').prop('disabled', true);  
+
+		}
+
+		function enableBrewing(){
+
+			$('#startBrewButton').prop('checked', false);
+			$('#startBrewButton').prop('disabled', false);
+			$('#stopBrewButton').prop('checked', false);
+			$('#stopBrewButton').prop('disabled', false);
+			
+
+		}
+
+		function disableBrewing(){
+
+			$('#startBrewButton').prop('checked', false);
+			$('#startBrewButton').prop('disabled', true);
+			$('#stopBrewButton').prop('checked', false);
+			$('#stopBrewButton').prop('disabled', true);
+
+		}
+
+		function enableStartDisableStopBrewing(){
+			$('#startBrewButton').prop('checked', false);
+			$('#startBrewButton').prop('disabled', false);
+			$('#stopBrewButton').prop('checked', false);
+			$('#stopBrewButton').prop('disabled', true);    
+		}
+
+		function getBrewingDevice(){
+
+			if($('#coffeepotButton').is(':checked')) { 
+				return 'coffeepot';
+			}
+			else if($('#teapotButton').is(':checked')){
+				return 'teapot';
+			}
+
+		}
+
+		function getCoffeeAdditions()
+		{
+
+			if($('#wholeMilkButton').is(':checked')) { 
+				return 'milk-type;Whole-milk';
+			}
+			else if($('#noAdditionButton').is(':checked')){
+				return '';
+			}
+
+		}
+
+
+		function getCoffeeCommand(){
+
+			if($('#startBrewButton').is(':checked')) { 
+				return 'start'
+			}
+			else if($('#stopBrewButton').is(':checked')) { 
+				return 'stop'
+			}
+
+		}
+
+	</script>
+
+</body>
+</html>
